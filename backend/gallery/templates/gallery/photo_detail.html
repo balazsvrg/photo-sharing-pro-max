@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h2>{{ photo.name }}</h2>
+  <p>Feltöltve: {{ photo.uploaded_at|date:"Y-m-d H:i" }}</p>
+  <img src="{{ photo.image.url }}" alt="{{ photo.name }}" class="img-fluid rounded mb-4">
+  <a href="{% url 'gallery_list' %}" class="btn btn-secondary">Vissza a galériához</a>
+{% endblock %}
