@@ -1,7 +1,5 @@
-# Base image
 FROM node:20-alpine
 
-# Set working directory
 WORKDIR /app
 
 # Copy dependency files and install
@@ -11,8 +9,10 @@ RUN npm install --legacy-peer-deps
 # Copy all source code
 COPY . .
 
-# Expose the dev server port (default 3000)
+# Fix permissions inside container
+RUN mkdir -p .next && chmod -R 777 .next
+
+# Expose the dev server port
 EXPOSE 3000
 
-# Start in development mode
 CMD ["npm", "run", "dev"]
