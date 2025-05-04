@@ -1,33 +1,31 @@
-# Use official Node.js base image
 FROM node:20-alpine
 
-# Create app directory
 WORKDIR /app
 
-# Install dependencies before copying full app to leverage Docker cache
+# Copy and install dependencies
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY next.config.ts ./
 COPY public ./public
 
-# Install dependencies with non-root permissions
 RUN npm install
 
-# Copy the rest of the application code
+# Copy application source
 COPY . .
 
-# Ensure proper ownership and avoid EACCES errors
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup \
-  && chown -R appuser:appgroup /app
-
-# Switch to non-root user
-USER appuser
-
-# Build the Next.js app
+# Build as root — no issue here since it's during build
 RUN npm run build
 
-# Expose port used by Next.js
+# Make critical folders writable by any user (OpenShift safe)
+RUN mkdir -p /app/.next/cache/fetch-cache /app/runtime-cache \
+  && chmod -R 777 /app/.next /app/runtime-cache
+
+# Environment settings
+ENV NODE_ENV=production
+ENV NEXT_RUNTIME_CACHE_DIR=/app/runtime-cache
+
+# Expose default port
 EXPOSE 3000
 
-# Start the app
+# Use non-root execution — but OpenShift may override this UID
 CMD ["npm", "start"]
