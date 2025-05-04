@@ -28,7 +28,8 @@ SECRET_KEY = 'django-insecure-%8v62$-yjr$9xa5=3gym$xws*fn+%y*2ci*xv6d&t20$ayi=b&
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '.openshiftapps.com'
+    '.openshiftapps.com',
+    'photo-sharing-pro-max-backend'
 ]
 
 
