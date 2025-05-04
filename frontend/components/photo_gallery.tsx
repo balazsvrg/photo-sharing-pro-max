@@ -137,7 +137,7 @@ const PhotoGallery = () => {
               >
                 <div className="relative h-48 group cursor-pointer">
                   {photo.image ? (
-                    <Image
+                    <img
                       src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`}
                       alt={photo.title || "Untitled"}
                       fill
