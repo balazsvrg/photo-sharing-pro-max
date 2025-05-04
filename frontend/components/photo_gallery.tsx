@@ -140,7 +140,6 @@ const PhotoGallery = () => {
                     <img
                       src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`}
                       alt={photo.title || "Untitled"}
-                      fill
                       className="object-cover transition-opacity duration-300 group-hover:opacity-60"
                       onClick={() =>
                         setPreviewImage(`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`)
@@ -212,10 +211,9 @@ const PhotoGallery = () => {
             x
           </button>
           <div className="relative w-[90vw] h-[90vh] rounded-lg overflow-hidden">
-            <Image
+            <img
               src={previewImage}
               alt="Preview"
-              fill
               className="object-contain"
             />
           </div>
