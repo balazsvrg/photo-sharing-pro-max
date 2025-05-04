@@ -20,12 +20,18 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Create .next directory and set appropriate permissions
+RUN mkdir -p /app/.next && chown -R node:node /app/.next
+
 # Copy built app
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
+# Set user to 'node' (non-root user)
+USER node
+
 EXPOSE 3000
 
-CMD ["sh", "-c", "npm start && tail -f /dev/null"]
+CMD ["npm", "start"]
