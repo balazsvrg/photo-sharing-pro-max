@@ -44,21 +44,24 @@ def logout_view(request):
     request.user.auth_token.delete()
     return Response({"message": "Logged out successfully"}, status=200)
 
-@api_view(['GET'])
-@permission_classes([AllowAny])
-def photo_list(request):
-    photos = Photo.objects.all().order_by('upload_date')
-    serializer = PhotoSerializer(photos, many=True)
-    return Response(serializer.data)
+@api_view(['GET', 'POST'])
+def photo_list_create(request):
+    if request.method == 'GET':
+        # Anyone can view photos
+        photos = Photo.objects.all().order_by('upload_date')
+        serializer = PhotoSerializer(photos, many=True)
+        return Response(serializer.data)
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def photo_create(request):
-    serializer = PhotoSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save(owner=request.user)
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
+    elif request.method == 'POST':
+        # Require authentication for uploading
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication credentials were not provided.'}, status=401)
+
+        serializer = PhotoSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(owner=request.user)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
 
 @api_view(['GET', 'DELETE'])
