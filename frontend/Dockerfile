@@ -25,15 +25,6 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-# Change ownership to node user
-RUN chown -R node:node /app
-
-# Fix restrictive permissions if needed
-RUN chmod -R u+rwX /app
-
-# Switch to non-root user
-USER node
-
 EXPOSE 3000
 
 CMD ["npm", "start"]
