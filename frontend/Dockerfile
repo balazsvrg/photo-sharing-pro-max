@@ -26,8 +26,11 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-# Change ownership of all files to the 'node' user
+# Change ownership to node user
 RUN chown -R node:node /app
+
+# Fix restrictive permissions if needed
+RUN chmod -R u+rwX /app
 
 # Switch to non-root user
 USER node
