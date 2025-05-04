@@ -7,24 +7,43 @@ import { Photo } from "@/types/photo";
 type SortKey = "owner" | "upload_date";
 type SortOrder = "asc" | "desc";
 
-interface Props {
-  photos: Photo[];
-}
-
-const PhotoGallery = ({ photos }: Props) => {
+const PhotoGallery = () => {
+  const [photos, setPhotos] = useState<Photo[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [selectedPhotoId, setSelectedPhotoId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [sortKey, setSortKey] = useState<SortKey>("upload_date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const fetchPhotos = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/photos/`, {
+        headers: {
+          Authorization: `Token ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) throw new Error("Failed to fetch photos");
+
+      const data = await response.json();
+      setPhotos(data);
+    } catch (err) {
+      setError("Error loading photos.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const username = localStorage.getItem("username");
     setLoggedInUsername(username);
+    fetchPhotos();
   }, []);
 
   const handleDelete = async () => {
@@ -33,13 +52,14 @@ const PhotoGallery = ({ photos }: Props) => {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/photos/${selectedPhotoId}/`, {
       method: "DELETE",
       headers: {
-        "Authorization": `Token ${localStorage.getItem("token")}`,
+        Authorization: `Token ${localStorage.getItem("token")}`,
       },
     });
 
     if (response.ok) {
       setShowDeleteModal(false);
-      // Optionally refetch or update parent state if passed
+      setSelectedPhotoId(null);
+      await fetchPhotos();
     } else {
       const errorData = await response.json();
       setError(errorData.detail || "Failed to delete the photo.");
@@ -59,7 +79,6 @@ const PhotoGallery = ({ photos }: Props) => {
 
   return (
     <div className="relative">
-      {/* Sort Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-white">Photos</h2>
         <div className="relative">
@@ -104,53 +123,57 @@ const PhotoGallery = ({ photos }: Props) => {
         </div>
       </div>
 
-      {/* Photo Grid */}
-      <div className={previewImage ? "blur-sm transition duration-300" : "transition duration-300"}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {getSortedPhotos().map((photo) => (
-            <div
-              key={photo.id}
-              className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col"
-            >
-              <div className="relative h-48 group cursor-pointer">
-                {photo.image ? (
-                  <Image
-                    src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`}
-                    alt={photo.title || "Untitled"}
-                    fill
-                    className="object-cover transition-opacity duration-300 group-hover:opacity-60"
-                    onClick={() =>
-                      setPreviewImage(`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`)
-                    }
-                  />
-                ) : (
-                  <div className="flex justify-center items-center w-full h-full bg-gray-700">
-                    No image available
-                  </div>
-                )}
+      {/* Loading Indicator */}
+      {loading ? (
+        <p className="text-center text-gray-400">Loading photos...</p>
+      ) : (
+        <div className={previewImage ? "blur-sm transition duration-300" : "transition duration-300"}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {getSortedPhotos().map((photo) => (
+              <div
+                key={photo.id}
+                className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col"
+              >
+                <div className="relative h-48 group cursor-pointer">
+                  {photo.image ? (
+                    <Image
+                      src={`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`}
+                      alt={photo.title || "Untitled"}
+                      fill
+                      className="object-cover transition-opacity duration-300 group-hover:opacity-60"
+                      onClick={() =>
+                        setPreviewImage(`${process.env.NEXT_PUBLIC_BACKEND_URL}${photo.image}`)
+                      }
+                    />
+                  ) : (
+                    <div className="flex justify-center items-center w-full h-full bg-gray-700">
+                      No image available
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 flex flex-col items-center text-center">
+                  <h2 className="font-semibold text-xl">{photo.title || "Untitled"}</h2>
+                  <p className="text-sm text-gray-400">{photo.owner}</p>
+                  <p className="text-sm text-gray-500">
+                    {new Date(photo.upload_date).toLocaleDateString()}
+                  </p>
+                  {loggedInUsername === photo.owner && (
+                    <button
+                      onClick={() => {
+                        setSelectedPhotoId(photo.id);
+                        setShowDeleteModal(true);
+                      }}
+                      className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
-              <div className="p-4 flex flex-col items-center text-center">
-                <h2 className="font-semibold text-xl">{photo.title || "Untitled"}</h2>
-                <p className="text-sm text-gray-400">{photo.owner}</p>
-                <p className="text-sm text-gray-500">
-                  {new Date(photo.upload_date).toLocaleDateString()}
-                </p>
-                {loggedInUsername === photo.owner && (
-                  <button
-                    onClick={() => {
-                      setSelectedPhotoId(photo.id);
-                      setShowDeleteModal(true);
-                    }}
-                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-300"
-                  >
-                    Delete
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Delete Modal */}
       {showDeleteModal && (

@@ -5,22 +5,15 @@ import PhotoGallery from "@/components/photo_gallery";
 import Navbar from "@/components/navbar";
 import UploadModal from "@/components/upload_modal"; // Import the upload modal
 
-export default async function HomePage() {
-  // Fetch photos server-side
-  const photos: Photo[] = await fetchPhotos();
-  
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       <Navbar />
       <main className="pt-24 px-6 max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-6 text-blue-500">Gallery</h1>
-
-        {/* Display loading state */}
-        <PhotoGallery photos={photos} />
+        <PhotoGallery />
       </main>
-      
-      {/* Floating Upload Button */}
-      <UploadModal /> {/* This will be a client-side component */}
+      <UploadModal />
     </div>
   );
 }
