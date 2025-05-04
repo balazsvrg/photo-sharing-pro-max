@@ -4,7 +4,6 @@ import { Photo } from "@/types/photo";
 import PhotoGallery from "@/components/photo_gallery";
 import Navbar from "@/components/navbar";
 import UploadModal from "@/components/upload_modal"; // Import the upload modal
-import PhotoRefreshButton from "@/components/photo_refresh_button";
 
 export default async function HomePage() {
   // Fetch photos server-side
