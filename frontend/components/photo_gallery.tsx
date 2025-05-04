@@ -23,6 +23,7 @@ const PhotoGallery = () => {
   const fetchPhotos = async () => {
     setLoading(true);
     try {
+      console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/photos/`, {
         headers: {
           Authorization: `Token ${localStorage.getItem("token")}`,
