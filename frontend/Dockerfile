@@ -7,7 +7,7 @@ WORKDIR /app
 # Install dependencies before copying full app to leverage Docker cache
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY next.config.js ./
+COPY next.config.ts ./
 COPY public ./public
 
 # Install dependencies with non-root permissions
